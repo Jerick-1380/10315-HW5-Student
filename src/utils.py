@@ -2,6 +2,7 @@ import numpy as np
 import gzip
 import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.ticker as mtick
 
 def consistent_scale_eigenvectors(V):
     """ Scale the columns of V such that everyone uses a consistent
@@ -52,7 +53,7 @@ def plot_2d_pca_with_clusters_and_legend(pca_result, labels, K=2):
     plt.show()
 
 
-def run_kmeans_and_plot(df, K=4):
+def run_kmeans_and_plot(df, kmeans, pca, K=4):
     """
     Runs PCA and k-means clustering on the DataFrame, then plots the 2D PCA results with clusters
     and separate histograms showing the yearly distribution for each cluster label, each with its own x-axis.
@@ -61,8 +62,12 @@ def run_kmeans_and_plot(df, K=4):
     - df: pandas DataFrame with a date index and features for clustering.
     - K: int, the number of clusters for k-means (default is 4).
     """
+    
     X = df.values
     pca_result = pca(X, 2)
+
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df.index = pd.to_datetime(df.index)
     
     centroids, labels = kmeans(pca_result, K)
 
@@ -72,6 +77,7 @@ def run_kmeans_and_plot(df, K=4):
     fig, axes = plt.subplots(K, 1, figsize=(10, 5 * K))
     for i, label in enumerate(range(K)):
         # Extract years corresponding to each cluster label
+  
         years = df.index.year
         year_labels = years[labels == label]
 
