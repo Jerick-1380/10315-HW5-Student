@@ -1,6 +1,12 @@
 import numpy as np
 import gzip
 import matplotlib.pyplot as plt
+import pandas as pd
+
+def get_data():
+  path = 'data/stock_returns.csv'
+  df = pd.read_csv(path, index_col=0)
+  return df
 
 class BatchedMNIST:
     def __init__(self, dataset="training", batch_size=32, randomize=True):
