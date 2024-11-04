@@ -3,10 +3,96 @@ import gzip
 import matplotlib.pyplot as plt
 import pandas as pd
 
+def consistent_scale_eigenvectors(V):
+    """ Scale the columns of V such that everyone uses a consistent
+        set of eigenvectors.
+
+        Input:
+        V: numpy ndarray each **column** is an eigenvector
+
+        Returns V. V is modified in place and also returned.
+
+        Implementation based on code from https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/utils/extmath.py::svd_flip
+    """
+    max_abs_cols = np.argmax(np.abs(V), axis=0)
+    signs = np.sign(V[max_abs_cols, range(V.shape[1])])
+    V *= signs
+    return V
+
 def get_data():
   path = 'data/stock_returns.csv'
   df = pd.read_csv(path, index_col=0)
   return df
+
+
+def plot_2d_pca_with_clusters_and_legend(pca_result, labels, K=2):
+    """
+    Plots the 2D PCA-compressed dataset with color-coded clusters and a legend.
+
+    Args:
+    - pca_result: pandas DataFrame with a date index and two columns for the principal components.
+    - labels: numpy ndarray of shape (N,) with cluster labels from k-means.
+    - K: int, the number of clusters (default is 2).
+    """
+    # Convert DataFrame to a NumPy array if needed
+    pca_array = pca_result.values if isinstance(pca_result, pd.DataFrame) else pca_result
+
+    plt.figure(figsize=(10, 6))
+    
+    # Scatter plot with color based on cluster labels
+    for i in range(K):
+        cluster_points = pca_array[labels == i]
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f"Cluster {i}", alpha=0.7)
+
+    plt.xlabel("Principal Component 1")
+    plt.ylabel("Principal Component 2")
+    plt.title("2D PCA Projection with K-Means Clusters")
+    plt.legend(title="Clusters")
+    plt.grid(True)
+    plt.show()
+
+
+def run_kmeans_and_plot(df, K=4):
+    """
+    Runs PCA and k-means clustering on the DataFrame, then plots the 2D PCA results with clusters
+    and separate histograms showing the yearly distribution for each cluster label, each with its own x-axis.
+
+    Args:
+    - df: pandas DataFrame with a date index and features for clustering.
+    - K: int, the number of clusters for k-means (default is 4).
+    """
+    X = df.values
+    pca_result = pca(X, 2)
+    
+    centroids, labels = kmeans(pca_result, K)
+
+    plot_2d_pca_with_clusters_and_legend(pd.DataFrame(pca_result, index=df.index), labels, K)
+
+    # Step 5: Plot separate histograms for each cluster label, each with its own x-axis
+    fig, axes = plt.subplots(K, 1, figsize=(10, 5 * K))
+    for i, label in enumerate(range(K)):
+        # Extract years corresponding to each cluster label
+        years = df.index.year
+        year_labels = years[labels == label]
+
+        # Count occurrences of each year for the current cluster
+        year_counts = year_labels.value_counts().sort_index().astype(int)
+
+        # Plot histogram for the current cluster
+        axes[i].bar(year_counts.index, year_counts.values, color='skyblue', alpha=0.7)
+        axes[i].set_title(f"Yearly Distribution of Points in Cluster {label}")
+        axes[i].set_xlabel("Year")
+        axes[i].set_ylabel("Number of Points")
+        axes[i].grid(axis="y", linestyle="--", alpha=0.7)
+        
+        # Format x-axis for each histogram
+        axes[i].xaxis.set_major_formatter(mtick.StrMethodFormatter("{x:.0f}"))
+        axes[i].set_xticks(year_counts.index)
+        axes[i].tick_params(axis='x', rotation=45)
+
+    plt.tight_layout()
+    plt.show()
+
 
 class BatchedMNIST:
     def __init__(self, dataset="training", batch_size=32, randomize=True):
