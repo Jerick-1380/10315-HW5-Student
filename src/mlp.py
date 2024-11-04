@@ -416,6 +416,3 @@ def train_NN(neural_network, lr, batch_size, num_epochs, train_batches_per_epoch
         
     return training_losses, validation_losses, training_accuracies, validation_accuracies
 
-
-
-
