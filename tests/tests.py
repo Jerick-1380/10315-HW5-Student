@@ -8,7 +8,7 @@ ABSOLUTE_TOLERANCE = 1e-5
 ################################################### Testing PCA ###################################################
 
 pca_tests = TestSuite("Testing PCA")
-X = np.array([[0.08307042, 0.32274563, 0.37534289, 0.7426287 , 0.39798024,
+X_pca = np.array([[0.08307042, 0.32274563, 0.37534289, 0.7426287 , 0.39798024,
         0.48057114, 0.07972084, 0.8440798 , 0.97548652, 0.61562405],
        [0.96605144, 0.02892874, 0.98881999, 0.97047229, 0.10263405,
         0.19608541, 0.33336853, 0.90397422, 0.45622695, 0.42635096],
@@ -141,29 +141,29 @@ true_pca_result_2 = np.array([[-7.61817423e-02, -1.84238618e-01,  2.14646690e-01
 
 
 def pca_test_1():
-    pca_result_1 = pca(X, 2)
+    pca_result_1 = pca(X_pca, 2)
     assert np.shape(pca_result_1) == np.shape(true_pca_result_1)
 pca_tests.add_test(Test("Testing shape of PCA (dim 2)", pca_test_1))
 
 def pca_test_2():
-    pca_result_1 = pca(X, 2)
+    pca_result_1 = pca(X_pca, 2)
     np.testing.assert_allclose(pca_result_1, true_pca_result_1, rtol=0, atol=ABSOLUTE_TOLERANCE)
 pca_tests.add_test(Test("Testing values of PCA (dim 2)", pca_test_2))
 
 def pca_test_3():
-    pca_result_2 = pca(X, 5)
+    pca_result_2 = pca(X_pca, 5)
     assert np.shape(pca_result_2) == np.shape(true_pca_result_2)
 pca_tests.add_test(Test("Testing shape of PCA (dim 5)", pca_test_3))
 
 def pca_test_4():
-    pca_result_2 = pca(X, 5)
+    pca_result_2 = pca(X_pca, 5)
     np.testing.assert_allclose(pca_result_2, true_pca_result_2, rtol=0, atol=ABSOLUTE_TOLERANCE)
 pca_tests.add_test(Test("Testing values of PCA (dim 5)", pca_test_4))
 
 ################################################# Testing K-means #################################################
 kmeans_tests = TestSuite("Testing K-means")
 
-X = np.array([[0.85745436, 0.98771417, 0.88327135, 0.44211814],
+X_kmeans = np.array([[0.85745436, 0.98771417, 0.88327135, 0.44211814],
        [0.73211608, 0.94682821, 0.42469956, 0.06038805],
        [0.71739969, 0.18591835, 0.42182926, 0.2495084 ],
        [0.4139848 , 0.75422917, 0.22952695, 0.34383521],
@@ -198,8 +198,8 @@ true_kmeans_5_centroid = np.array([[0.85745436, 0.98771417, 0.88327135, 0.442118
 
 true_kmeans_5_labels = np.array([0, 1, 2, 1, 4, 2, 3, 1, 3, 3, 1, 3, 1, 1, 3, 2, 2, 3, 2, 3])
 
-test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X,2)
-test_kmeans_5_centroid, test_kmeans_5_labels = kmeans(X,5)
+test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
+test_kmeans_5_centroid, test_kmeans_5_labels = kmeans(X_kmeans,5)
 
 def kmeans_test_1():
     assert np.shape(test_kmeans_2_centroid) == np.shape(true_kmeans_2_centroid)
