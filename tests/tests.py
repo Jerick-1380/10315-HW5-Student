@@ -1,5 +1,5 @@
 from .test_lib import Test, TestSuite
-from src import *
+from src import pca, kmeans, boxcar, linear, rbf, polynomial
 import numpy as np
 import numdifftools as nd
 
