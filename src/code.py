@@ -42,6 +42,9 @@ def pca(X, K):
 
 def kmeans(X, K):
     """ Cluster data X into K converged clusters.
+
+        The algorithm should terminate if there are no changes in labels.
+        MAKE SURE TO INITIALIZE CLUSTERS TO BE THE FIRST K POINTS!!!
     
         X: an N-by-M numpy ndarray, where we want to assign each
             of the N data points to a cluster.
@@ -56,13 +59,8 @@ def kmeans(X, K):
     N = X.shape[0]
     M = X.shape[1]
 
-    # Initialize cluster centers to the first K points of X
     C = np.copy(X[:K])
-
-    # Initialize z temporarily to all -1 values
     z = -1*np.ones(N, dtype=np.int32)
-
-    # write your solution here
 
     while(True):
       Cnew = C.reshape(K, 1, -1)
@@ -80,16 +78,51 @@ def kmeans(X, K):
 
 
 def boxcar(x, z, width):
-      return 1.0 if np.linalg.norm(x-z) <=width/2 else 0.0
+    """ Return the result of applying the radial basis function kernel 
+        on the two input vectors, given the hyperparameter gamma.
+
+        x: Mx1 numpy ndarray
+        z: Mx1 numpy ndarray
+        gamma: float value of hyperparameter
+        
+        Returns: float value after appying kernel to x and z
+    """
+    return 1.0 if np.linalg.norm(x-z) <=width/2 else 0.0
 
 def linear(x, z):
-      return np.dot(x,z)
+    """ Return the result of simply taking the dot product of the two 
+        input vectors.
+
+        x: Mx1 numpy ndarray
+        z: Mx1 numpy ndarray
+        
+        Returns: float value after appying kernel to x and z
+     """
+    return np.dot(x,z)
 
 def rbf(x, z, gamma):
-      return np.exp(-gamma * np.linalg.norm(x-z)**2)
+    """ Return the result of applying the radial basis function kernel 
+        on the two input vectors, given the hyperparameter gamma.
+
+        x: Mx1 numpy ndarray
+        z: Mx1 numpy ndarray
+        gamma: float value of hyperparameter
+        
+        Returns: float value after appying kernel to x and z
+    """
+    return np.exp(-gamma * np.linalg.norm(x-z)**2)
       
 def polynomial(x, z, d):
-      x = np.ndarray.flatten(x)
-      z = np.ndarray.flatten(z)
-      return (np.dot(x,z)+1)**d
+    """ Return the result of applying the polynomial kernel of degree 
+        up to d on the two input vectors.
+        K(x, z) = (x^Tz+1)^d
 
+        x: Mx1 numpy ndarray
+        z: Mx1 numpy ndarray
+        
+        Returns: float value after appying kernel to x and z
+    """
+    x = np.ndarray.flatten(x)
+    z = np.ndarray.flatten(z)
+    return (np.dot(x,z)+1)**d
+    
