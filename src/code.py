@@ -33,7 +33,7 @@ def pca(X, K):
         Returns a numpy ndarray of shape (N, K)
     """
     #Student Solution HERE
-    return np.empty()
+    return 0.0
 
 
 def kmeans(X, K):
@@ -53,7 +53,7 @@ def kmeans(X, K):
                 representing the cluster index for the i-th point in X
     """
     #Student Solution HERE
-    return np.empty()
+    return 0.0
 
 
 def boxcar(x, z, width):
