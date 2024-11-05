@@ -33,6 +33,7 @@ def pca(X, K):
         Returns a numpy ndarray of shape (N, K)
     """
     #Student Solution HERE
+    return np.empty()
 
 
 def kmeans(X, K):
@@ -52,6 +53,7 @@ def kmeans(X, K):
                 representing the cluster index for the i-th point in X
     """
     #Student Solution HERE
+    return np.empty()
 
 
 def boxcar(x, z, width):
@@ -65,6 +67,7 @@ def boxcar(x, z, width):
         Returns: float value after appying kernel to x and z
     """
     #Student Solution HERE
+    return 0.0
 
 def linear(x, z):
     """ Return the result of simply taking the dot product of the two 
@@ -76,6 +79,7 @@ def linear(x, z):
         Returns: float value after appying kernel to x and z
      """
     #Student Solution HERE
+    return 0.0
 
 def rbf(x, z, gamma):
     """ Return the result of applying the radial basis function kernel 
@@ -88,6 +92,7 @@ def rbf(x, z, gamma):
         Returns: float value after appying kernel to x and z
     """
     #Student Solution HERE
+    return 0.0
       
 def polynomial(x, z, d):
     """ Return the result of applying the polynomial kernel of degree 
@@ -100,4 +105,5 @@ def polynomial(x, z, d):
         Returns: float value after appying kernel to x and z
     """
     #Student Solution HERE
+    return 0.0
     
