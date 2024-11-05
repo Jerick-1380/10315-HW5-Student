@@ -32,12 +32,7 @@ def pca(X, K):
 
         Returns a numpy ndarray of shape (N, K)
     """
-    X_center = X - np.mean(X,axis=0)
-    _, _, V = np.linalg.svd(X_center)
-    V = V.T
-    top_V = V[:,:K]
-    consistent_scale_eigenvectors(top_V)
-    return X_center @ top_V
+    #Student Solution HERE
 
 
 def kmeans(X, K):
@@ -56,25 +51,7 @@ def kmeans(X, K):
             z: a numpy ndarray with shape (N,) where the i-th entry is an int from {0..K-1}
                 representing the cluster index for the i-th point in X
     """
-    N = X.shape[0]
-    M = X.shape[1]
-
-    C = np.copy(X[:K])
-    z = -1*np.ones(N, dtype=np.int32)
-
-    while(True):
-      Cnew = C.reshape(K, 1, -1)
-      distances = np.sum(np.square(X-Cnew), axis = 2)
-      newZ = np.argmin(distances, axis=0)
-      if(np.array_equal(newZ,z)):
-        break
-
-      z = newZ
-
-      for i in range(K):
-        C[i] = X[newZ == i].mean(axis=0)
-
-    return (C, z)
+    #Student Solution HERE
 
 
 def boxcar(x, z, width):
@@ -87,7 +64,7 @@ def boxcar(x, z, width):
         
         Returns: float value after appying kernel to x and z
     """
-    return 1.0 if np.linalg.norm(x-z) <=width/2 else 0.0
+    #Student Solution HERE
 
 def linear(x, z):
     """ Return the result of simply taking the dot product of the two 
@@ -98,7 +75,7 @@ def linear(x, z):
         
         Returns: float value after appying kernel to x and z
      """
-    return np.dot(x,z)
+    #Student Solution HERE
 
 def rbf(x, z, gamma):
     """ Return the result of applying the radial basis function kernel 
@@ -110,7 +87,7 @@ def rbf(x, z, gamma):
         
         Returns: float value after appying kernel to x and z
     """
-    return np.exp(-gamma * np.linalg.norm(x-z)**2)
+    #Student Solution HERE
       
 def polynomial(x, z, d):
     """ Return the result of applying the polynomial kernel of degree 
@@ -122,7 +99,5 @@ def polynomial(x, z, d):
         
         Returns: float value after appying kernel to x and z
     """
-    x = np.ndarray.flatten(x)
-    z = np.ndarray.flatten(z)
-    return (np.dot(x,z)+1)**d
+    #Student Solution HERE
     
