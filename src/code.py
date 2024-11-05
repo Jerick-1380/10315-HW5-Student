@@ -53,7 +53,7 @@ def kmeans(X, K):
                 representing the cluster index for the i-th point in X
     """
     #Student Solution HERE
-    return 0.0
+    return 0.0, 0.0
 
 
 def boxcar(x, z, width):
