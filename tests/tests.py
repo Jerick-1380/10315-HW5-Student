@@ -198,25 +198,29 @@ true_kmeans_5_centroid = np.array([[0.85745436, 0.98771417, 0.88327135, 0.442118
 
 true_kmeans_5_labels = np.array([0, 1, 2, 1, 4, 2, 3, 1, 3, 3, 1, 3, 1, 1, 3, 2, 2, 3, 2, 3])
 
-test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
-test_kmeans_5_centroid, test_kmeans_5_labels = kmeans(X_kmeans,5)
 
 def kmeans_test_1():
+    test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
     assert np.shape(test_kmeans_2_centroid) == np.shape(true_kmeans_2_centroid)
 
 def kmeans_test_2():
+    test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
     assert np.shape(test_kmeans_2_labels) == np.shape(true_kmeans_2_labels)
 
 def kmeans_test_3():
+    test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
     np.testing.assert_allclose(test_kmeans_2_centroid, true_kmeans_2_centroid, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kmeans_test_4():
+    test_kmeans_2_centroid, test_kmeans_2_labels = kmeans(X_kmeans,2)
     np.testing.assert_allclose(test_kmeans_2_labels, true_kmeans_2_labels, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kmeans_test_5():
+    test_kmeans_5_centroid, test_kmeans_5_labels = kmeans(X_kmeans,5)
     np.testing.assert_allclose(test_kmeans_5_centroid, true_kmeans_5_centroid, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kmeans_test_6():
+    test_kmeans_5_centroid, test_kmeans_5_labels = kmeans(X_kmeans,5)
     np.testing.assert_allclose(test_kmeans_5_labels, true_kmeans_5_labels, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 
@@ -238,27 +242,27 @@ z = np.array([0.2476972 , 0.06244911, 0.89760641, 0.30924843, 0.63326517,
        0.12270706, 0.37657364, 0.76239715, 0.1742207 , 0.3148513 ])
 
 true_boxcar = 1.0
-test_boxcar = boxcar(x,z,3)
 
 true_linear = 2.147403254888077
-test_linear = linear(x,z)
 
 true_rbf = 0.8439004819055
-test_rbf = rbf(x,z,0.1)
 
 true_polynomial = 98.13175331649401
-test_polynomial = polynomial(x,z,4)
 
 def kernel_test_1():
+    test_boxcar = boxcar(x,z,3)
     np.testing.assert_allclose(test_boxcar, true_boxcar, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kernel_test_2():
+    test_linear = linear(x,z)
     np.testing.assert_allclose(test_linear, true_linear, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kernel_test_3():
+    test_rbf = rbf(x,z,0.1)
     np.testing.assert_allclose(test_rbf, true_rbf, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 def kernel_test_4():
+    test_polynomial = polynomial(x,z,4)
     np.testing.assert_allclose(test_polynomial, true_polynomial, rtol=0, atol=ABSOLUTE_TOLERANCE)
 
 
