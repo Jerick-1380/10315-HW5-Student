@@ -59,8 +59,7 @@ X = np.array([[0.08307042, 0.32274563, 0.37534289, 0.7426287 , 0.39798024,
        [0.36809785, 0.71418359, 0.53261572, 0.35358736, 0.60232414,
         0.53137357, 0.19634497, 0.00900154, 0.97758909, 0.59158614]])
 
-pca_result_1 = pca(X, 2)
-pca_result_2 = pca(X, 5)
+
 
 true_pca_result_1 = np.array([[-0.07618174, -0.18423862],
        [-0.78776947,  0.66460783],
@@ -142,21 +141,23 @@ true_pca_result_2 = np.array([[-7.61817423e-02, -1.84238618e-01,  2.14646690e-01
 
 
 def pca_test_1():
+    pca_result_1 = pca(X, 2)
     assert np.shape(pca_result_1) == np.shape(true_pca_result_1)
+pca_tests.add_test(Test("Testing shape of PCA (dim 2)", pca_test_1))
 
 def pca_test_2():
+    pca_result_1 = pca(X, 2)
     np.testing.assert_allclose(pca_result_1, true_pca_result_1, rtol=0, atol=ABSOLUTE_TOLERANCE)
+pca_tests.add_test(Test("Testing values of PCA (dim 2)", pca_test_2))
 
 def pca_test_3():
+    pca_result_2 = pca(X, 5)
     assert np.shape(pca_result_2) == np.shape(true_pca_result_2)
+pca_tests.add_test(Test("Testing shape of PCA (dim 5)", pca_test_3))
 
 def pca_test_4():
+    pca_result_2 = pca(X, 5)
     np.testing.assert_allclose(pca_result_2, true_pca_result_2, rtol=0, atol=ABSOLUTE_TOLERANCE)
-
-
-pca_tests.add_test(Test("Testing shape of PCA (dim 2)", pca_test_1))
-pca_tests.add_test(Test("Testing values of PCA (dim 2)", pca_test_2))
-pca_tests.add_test(Test("Testing shape of PCA (dim 5)", pca_test_3))
 pca_tests.add_test(Test("Testing values of PCA (dim 5)", pca_test_4))
 
 ################################################# Testing K-means #################################################
@@ -265,5 +266,7 @@ kernel_tests.add_test(Test("Testing Boxcar", kernel_test_1))
 kernel_tests.add_test(Test("Testing Linear", kernel_test_2))
 kernel_tests.add_test(Test("Testing RBF", kernel_test_3))
 kernel_tests.add_test(Test("Testing Polynomial", kernel_test_4))
+
+
 
 
