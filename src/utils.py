@@ -25,6 +25,26 @@ def get_data():
   df = pd.read_csv(path, index_col=0)
   return df
 
+def plot_2d_pca(pca_result):
+    """
+    Plots the 2D PCA-compressed dataset with color-coded clusters and a legend.
+
+    Args:
+    - pca_result: pandas DataFrame with a date index and two columns for the principal components.
+    - labels: numpy ndarray of shape (N,) with cluster labels from k-means.
+    - K: int, the number of clusters (default is 2).
+    """
+    pca_array = pca_result.values
+    plt.figure(figsize=(10, 6))
+    
+    plt.scatter(pca_array[:, 0], pca_array[:, 1], alpha=0.7)
+
+    plt.xlabel("Principal Component 1")
+    plt.ylabel("Principal Component 2")
+    plt.title("2D PCA Projection")
+    plt.grid(True)
+    plt.show()
+
 
 def plot_2d_pca_with_clusters_and_legend(pca_result, labels, K=2):
     """
@@ -35,12 +55,10 @@ def plot_2d_pca_with_clusters_and_legend(pca_result, labels, K=2):
     - labels: numpy ndarray of shape (N,) with cluster labels from k-means.
     - K: int, the number of clusters (default is 2).
     """
-    # Convert DataFrame to a NumPy array if needed
-    pca_array = pca_result.values if isinstance(pca_result, pd.DataFrame) else pca_result
 
+    pca_array = pca_result.values if isinstance(pca_result, pd.DataFrame) else pca_result
     plt.figure(figsize=(10, 6))
     
-    # Scatter plot with color based on cluster labels
     for i in range(K):
         cluster_points = pca_array[labels == i]
         plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f"Cluster {i}", alpha=0.7)
@@ -73,242 +91,143 @@ def run_kmeans_and_plot(df, kmeans, pca, K=4):
 
     plot_2d_pca_with_clusters_and_legend(pd.DataFrame(pca_result, index=df.index), labels, K)
 
-    # Step 5: Plot separate histograms for each cluster label, each with its own x-axis
     fig, axes = plt.subplots(K, 1, figsize=(10, 5 * K))
-    for i, label in enumerate(range(K)):
-        # Extract years corresponding to each cluster label
-  
+    for i, label in enumerate(range(K)):  
         years = df.index.year
         year_labels = years[labels == label]
 
-        # Count occurrences of each year for the current cluster
         year_counts = year_labels.value_counts().sort_index().astype(int)
 
-        # Plot histogram for the current cluster
         axes[i].bar(year_counts.index, year_counts.values, color='skyblue', alpha=0.7)
         axes[i].set_title(f"Yearly Distribution of Points in Cluster {label}")
         axes[i].set_xlabel("Year")
         axes[i].set_ylabel("Number of Points")
         axes[i].grid(axis="y", linestyle="--", alpha=0.7)
         
-        # Format x-axis for each histogram
         axes[i].xaxis.set_major_formatter(mtick.StrMethodFormatter("{x:.0f}"))
         axes[i].set_xticks(year_counts.index)
         axes[i].tick_params(axis='x', rotation=45)
 
     plt.tight_layout()
     plt.show()
+    return pca_result, labels
 
 
-class BatchedMNIST:
-    def __init__(self, dataset="training", batch_size=32, randomize=True):
-        """
-        Initialize the BatchedMNIST object.
-        
-        Parameters:
-            dataset (str): "training" or "validation"
-            batch_size (int): Number of samples per batch
-            randomize (bool): Whether to randomize on shuffle (for autograder consistency)
-        """
-        if dataset == "training":
-            images_path = 'data/MNIST/raw/train-images-idx3-ubyte.gz'
-            labels_path = 'data/MNIST/raw/train-labels-idx1-ubyte.gz'
-        elif dataset == "validation":
-            images_path = 'data/MNIST/raw/t10k-images-idx3-ubyte.gz'
-            labels_path = 'data/MNIST/raw/t10k-labels-idx1-ubyte.gz'
+
+def svm_train(X, y, C, kernel, tol=1e-3, max_passes=10):
+    """
+    Train a Support Vector Machine (SVM).
+    
+    Parameters:
+    - X: numpy array, shape (n_samples, n_features), the input data.
+    - y: numpy array, shape (n_samples,), the target labels (-1 or 1).
+    - C: float, regularization parameter.
+    - kernel: callable, kernel function that takes two vectors as input and returns a scalar.
+    - tol: float, tolerance for stopping criterion.
+    - max_passes: int, max number of passes over data without alpha changing.
+    
+    Returns:
+    - alphas: numpy array, shape (n_samples,), the Lagrange multipliers.
+    - b: float, the bias term.
+    - support_vectors: list of indices of support vectors.
+    """
+    n_samples, n_features = X.shape
+    alphas = np.zeros(n_samples)
+    b = 0
+    passes = 0
+
+    K = np.zeros((n_samples, n_samples))
+    for i in range(n_samples):
+        for j in range(n_samples):
+            K[i, j] = kernel(X[i], X[j])
+
+    while passes < max_passes:
+        alpha_pairs_changed = 0
+        for i in range(n_samples):
+            E_i = np.dot((alphas * y), K[:, i]) + b - y[i]
+
+            if (y[i] * E_i < -tol and alphas[i] < C) or (y[i] * E_i > tol and alphas[i] > 0):
+                j = np.random.choice([n for n in range(n_samples) if n != i])
+                E_j = np.dot((alphas * y), K[:, j]) + b - y[j]
+                alpha_i_old, alpha_j_old = alphas[i], alphas[j]
+
+                if y[i] != y[j]:
+                    L, H = max(0, alphas[j] - alphas[i]), min(C, C + alphas[j] - alphas[i])
+                else:
+                    L, H = max(0, alphas[i] + alphas[j] - C), min(C, alphas[i] + alphas[j])
+                if L == H:
+                    continue
+                eta = 2 * K[i, j] - K[i, i] - K[j, j]
+                if eta >= 0:
+                    continue
+
+                alphas[j] -= y[j] * (E_i - E_j) / eta
+                alphas[j] = np.clip(alphas[j], L, H)
+
+                if abs(alphas[j] - alpha_j_old) < 1e-5:
+                    continue
+
+                alphas[i] += y[i] * y[j] * (alpha_j_old - alphas[j])
+
+                b1 = b - E_i - y[i] * (alphas[i] - alpha_i_old) * K[i, i] - y[j] * (alphas[j] - alpha_j_old) * K[i, j]
+                b2 = b - E_j - y[i] * (alphas[i] - alpha_i_old) * K[i, j] - y[j] * (alphas[j] - alpha_j_old) * K[j, j]
+
+                if 0 < alphas[i] < C:
+                    b = b1
+                elif 0 < alphas[j] < C:
+                    b = b2
+                else:
+                    b = (b1 + b2) / 2
+
+                alpha_pairs_changed += 1
+
+        if alpha_pairs_changed == 0:
+            passes += 1
         else:
-            raise ValueError("Dataset must be 'training' or 'validation'")
-        
-        self.images = self.load_images(images_path)
-        self.labels = self.load_labels(labels_path)
-        self.batch_size = batch_size
-        self.indices = np.arange(len(self.images))
-        self.randomize = randomize
-        self.shuffle()
+            passes = 0
 
-    def load_images(self, filename):
-        """
-        Load the images from the idx3-ubyte file format.
-        """
-        with gzip.open(filename, 'rb') as f:
-            _ = int.from_bytes(f.read(4), 'big')  # Magic number
-            num_images = int.from_bytes(f.read(4), 'big')
-            rows = int.from_bytes(f.read(4), 'big')
-            cols = int.from_bytes(f.read(4), 'big')
-            buffer = f.read(num_images * rows * cols)
-            data = np.frombuffer(buffer, dtype=np.uint8)
-            data = data.reshape(num_images, rows, cols)
-        return data
+    support_vectors = np.where(alphas > 0)[0]
+    return alphas, b, support_vectors
 
-    def load_labels(self, filename):
-        """
-        Load the labels from the idx1-ubyte file format.
-        """
-        with gzip.open(filename, 'rb') as f:
-            _ = int.from_bytes(f.read(4), 'big')  # Magic number
-            num_labels = int.from_bytes(f.read(4), 'big')
-            buffer = f.read(num_labels)
-            labels = np.frombuffer(buffer, dtype=np.uint8)
-        return labels
-    
-    def shuffle(self):
-        """
-        Shuffle the dataset and re-batch it.
-        """
-        if self.randomize:
-            np.random.shuffle(self.indices)
-        self.batches = [
-            (self.images[self.indices[i:i + self.batch_size]],
-            self.labels[self.indices[i:i + self.batch_size]])
-            for i in range(0, len(self.images), self.batch_size)
-        ]
-
-    def __getitem__(self, index):
-        """
-        Get the batch at the given index.
-        
-        Parameters:
-            index (int): The batch index
-        
-        Returns:
-            tuple: (image batch, label batch)
-        """
-        return self.batches[index]
-
-    def __len__(self):
-        """
-        Return the total number of batches.
-        """
-        return len(self.batches)
-
-def visualize_batch(image_batch, label_batch, cols=8):
+def svm_predict(X_train, y_train, alphas, b, kernel, X_test):
     """
-    Visualize a batch of MNIST images with their corresponding labels.
+    Make predictions with the trained SVM model.
 
     Parameters:
-    image_batch (numpy array): Batch of images of shape (batch_size, 28, 28).
-    label_batch (numpy array): Batch of labels of shape (batch_size,).
-    cols (int): Number of columns in the grid. Default is 8.
+    - X_train: numpy array, training data.
+    - y_train: numpy array, training labels.
+    - alphas: numpy array, the learned Lagrange multipliers.
+    - b: float, the bias term.
+    - kernel: callable, kernel function.
+    - X_test: numpy array, test data.
+
+    Returns:
+    - predictions: numpy array, predicted labels for test data.
     """
-    batch_size = len(image_batch)
-    rows = (batch_size // cols) + int(batch_size % cols != 0)  # Calculate the number of rows
+    y_pred = []
+    for x in X_test:
+        result = sum(alphas[i] * y_train[i] * kernel(X_train[i], x) for i in range(len(X_train))) + b
+        y_pred.append(np.sign(result))
+    return np.array(y_pred)
 
-    fig, axes = plt.subplots(rows, cols, figsize=(cols * 1.5, rows * 1.5))
-    axes = axes.flatten()  # Flatten the axes array for easy iteration
-    
-    for i in range(batch_size):
-        img = image_batch[i]
-        label = label_batch[i]
-        
-        # Plot image
-        axes[i].imshow(img, cmap='gray')
-        axes[i].set_title(f"Label: {label}")
-        axes[i].axis('off')  # Hide axes
 
-    # Turn off remaining empty subplots
-    for i in range(batch_size, len(axes)):
-        axes[i].axis('off')
-
-    plt.tight_layout()
-    plt.show()
-
-def initialize_random_array(shape):
+def calculate_accuracy(X_train, y_train, alphas, b, kernel):
     """
-    Generates a random array with the specified shape using a fixed random seed for consistent results.
-    
+    Calculate the accuracy of the SVM model on the training set.
+
     Parameters:
-    shape (tuple of int): Desired dimensions of the output array
-    
+    - X_train: numpy array, training data.
+    - y_train: numpy array, training labels.
+    - alphas: numpy array, the learned Lagrange multipliers.
+    - b: float, the bias term.
+    - kernel: callable, kernel function.
+
     Returns:
-    numpy array: Randomly initialized array of the specified shape, containing values from a standard normal distribution (mean 0, variance 1).
+    - accuracy: float, accuracy of the model on the training set (in percentage).
     """
-    # Set the random seed for reproducibility DO NOT CHANGE THIS !!
-    np.random.seed(10315)
+    predictions = svm_predict(X_train, y_train, alphas, b, kernel, X_train)
 
-    random_array = np.random.randn(*shape)
-
-    np.random.seed(None)
-    
-    return random_array
-
-def clip_str(string, length):
-    """
-    Clips string to length 
-    """
-
-    return (str(string) + (" " * length))[:length]
-
-def get_accuracy(nn_output, y):
-    """
-    Gets the average accuracy given the neural network output and true labels.
-
-    Params:
-        nn_output (numpy array): output class probabilities from neural network with dimensions (batch_size, num_classes)
-        y (numpy array): true output labels in one-hot vector format with dimensions (batch_size, num_classes)
-    
-    Returns:
-        float: average accuracy of the nn_output
-    """
-    predicted_labels = np.argmax(nn_output, axis=1)
-    true_labels = np.argmax(y, axis=1)
-    correct_predictions = np.sum(predicted_labels == true_labels)
-    accuracy = correct_predictions / y.shape[0]
+    correct_predictions = np.sum(predictions == y_train)
+    accuracy = (correct_predictions / len(y_train)) * 100
 
     return accuracy
-
-def to_one_hot(y_labels, num_classes):
-    """
-    Converts an array of class labels into one-hot encoded vectors.
-
-    Params:
-        y_labels (numpy array): Array of class labels with shape (batch_size,).
-                                Each label is an integer between 0 and num_classes-1.
-        num_classes (int): The number of classes. This determines the size of the one-hot vectors.
-    
-    Returns:
-        numpy array: A one-hot encoded array of shape (batch_size, num_classes).
-                     Each row corresponds to the one-hot encoding of a label.
-    """
-    one_hot = np.zeros((y_labels.shape[0], num_classes))    
-    one_hot[np.arange(y_labels.shape[0]), y_labels] = 1
-    
-    return one_hot
-
-def plot_training_history(train_losses, val_losses, train_accuracies, val_accuracies):
-    """
-    Plots the training and validation losses and accuracies over epochs.
-
-    Args:
-        train_losses (list of float): List of training loss values for each epoch.
-        val_losses (list of float): List of validation loss values for each epoch.
-        train_accuracies (list of float): List of training accuracy values for each epoch.
-        val_accuracies (list of float): List of validation accuracy values for each epoch.
-
-    Returns:
-        None: Displays two plots, one for the loss and one for the accuracy, 
-        with legends differentiating between training and validation metrics.
-    """
-    epochs = range(1, len(train_losses) + 1)
-
-    # Plot Losses
-    plt.figure(figsize=(12, 6))
-    
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs, train_losses, 'b', label='Training Loss')
-    plt.plot(epochs, val_losses, 'r', label='Validation Loss')
-    plt.title('Training and Validation Loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-
-    # Plot Accuracies
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs, train_accuracies, 'b', label='Training Accuracy')
-    plt.plot(epochs, val_accuracies, 'r', label='Validation Accuracy')
-    plt.title('Training and Validation Accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-
-    plt.tight_layout()
-    plt.show()
