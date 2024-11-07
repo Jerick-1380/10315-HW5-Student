@@ -31,10 +31,8 @@ def plot_2d_pca(pca_result):
 
     Args:
     - pca_result: pandas DataFrame with a date index and two columns for the principal components.
-    - labels: numpy ndarray of shape (N,) with cluster labels from k-means.
-    - K: int, the number of clusters (default is 2).
     """
-    pca_array = pca_result.values
+    pca_array = pca_result.values if isinstance(pca_result, pd.DataFrame) else pca_result
     plt.figure(figsize=(10, 6))
     
     plt.scatter(pca_array[:, 0], pca_array[:, 1], alpha=0.7)
